@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=contour
+GenericName=Terminal Emulator
+Comment=A modern C++ Terminal Emulator
+Exec=contour
+Icon=${SNAP}/meta/gui/contour-logo-256.png
+Type=Application
+Categories=Utility

@@ -1,0 +1,132 @@
+name: contour-thefenriswolf # you probably want to 'snapcraft register <name>'
+base: core20
+version: '18082020'
+summary: Contour - A modern C++ Terminal Emulator
+description: |
+  contour is a modern terminal emulator, for everyday use. It is fully seperating emulation
+  from graphical representation for clear seperation of concerns but also for special
+  features to come before version 1.0 is released (headless terminal server with GUI & TUI
+  frontends).
+
+license: Apache-2.0
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+
+apps:
+  contour:
+    plugs:
+      - x11
+      - opengl
+      - home
+      - removable-media
+      - network
+      - network-bind
+      - desktop
+      - desktop-legacy
+      - unity7
+      - wayland
+    environment:
+      QT_QPA_PLATFORM_PLUGIN_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qt5/plugins"
+      LIBGL_DRIVERS_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri
+      LD_LIBRARY_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET"
+      XDG_CURRENT_DESKTOP: Unity
+      GTK_PATH: $SNAP/lib/gtk-2.0
+      TMPDIR: $XDG_RUNTIME_DIR     
+      LC_ALL: "C.UTF-8"
+      LANG: "C.UTF-8"
+    command: desktop-launch &SNAP/usr/local/bin/contour
+
+parts:
+  contour:
+    after: [desktop-qt5]
+    source: https://github.com/christianparpart/contour.git
+    source-type: git
+    source-commit: 2089d98a92e06661fab72650388c0bb88be457fe
+#    source-tag:  
+    plugin: cmake
+    cmake-parameters: [
+      "-DCMAKE_CXX_FLAGS='-fdiagnostics-color=always \
+                           -D_FORTIFY_SOURCE=2 \
+                           -D_GLIBCXX_ASSERTIONS \
+                           -fasynchronous-unwind-tables \
+                           -fexceptions \
+                           -fpie -Wl,-pie \
+                           -fstack-clash-protection \
+                           -fstack-protector-strong
+                           -g \
+                           -grecord-gcc-switches \
+                           -O2 \
+                           -pipe \
+                           -Wall \
+                           -Werror=format-security \
+                           -Wl,-z,defs \
+                           -Wl,-z,now \
+                           -Wl,-z,relro'",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DCMAKE_EXPORT_COMPILE_COMMANDS='ON'",
+      "-DOpenGL_GL_PREFERENCE='LEGACY'",
+      "-DYAML_CPP_BUILD_CONTRIB='OFF'",
+      "-DYAML_CPP_BUILD_TOOLS='OFF'",
+      "-DYAML_CPP_BUILD_TESTS='OFF'",
+      "-DYAML_CPP_INSTALL='OFF'",
+      "-DYAML_BUILD_SHARED_LIBS='OFF'",
+#      "-DLIBTERMINAL_LOG_RAW='ON'",
+#      "-DLIBTERMINAL_LOG_TRACE='ON'",
+      "-DLIBTERMINAL_EXECUTION_PAR='ON'",
+      "-DCONTOUR_COVERAGE='OFF'",
+      "-DCONTOUR_PERF_STATS='OFF'",
+      "-DCONTOUR_BLUR_PLATFORM_KWIN='ON'" ]
+    build-packages:
+      - cmake
+      - extra-cmake-modules
+      - g++
+      - libfreetype6-dev
+      - qtbase5-dev
+      - qt5-default
+      - libqt5gui5
+      - libfontconfig1-dev
+      - libharfbuzz-dev
+      - libkf5windowsystem-dev
+      - libtbb-dev
+    stage-packages:
+#      - libgl1-mesa-dri
+      - libkf5windowsystem5
+      - libqt5x11extras5
+      - libtbb2
+
+  desktop-qt5:
+    build-packages:
+      - build-essential
+      - qtbase5-dev
+      - dpkg-dev
+    make-parameters:
+      - FLAVOR=qt5
+    plugin: make
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5
+      - try:
+        - appmenu-qt5
+      - locales-all
+      - xdg-user-dirs
+      - fcitx-frontend-qt5
+      - libatk1.0-0
+      - libgtk2.0-0
+      - libxcomposite1
+      - libxcursor1
+      - libxinerama1
+      - libxrandr2
