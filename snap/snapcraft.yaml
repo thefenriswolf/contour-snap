@@ -1,6 +1,6 @@
 name: contour-thefenriswolf # you probably want to 'snapcraft register <name>'
 base: core20
-version: '18082020'
+version: '30072020'
 summary: Contour - A modern C++ Terminal Emulator
 description: |
   contour is a modern terminal emulator, for everyday use. It is fully seperating emulation
@@ -14,7 +14,8 @@ grade: stable
 confinement: strict
 
 architectures:
-  - build-on: amd64
+  - build-on: [amd64]
+    run-on: [amd64]
 
 apps:
   contour:
@@ -38,7 +39,7 @@ apps:
       TMPDIR: $XDG_RUNTIME_DIR     
       LC_ALL: "C.UTF-8"
       LANG: "C.UTF-8"
-    command: desktop-launch &SNAP/usr/local/bin/contour
+    command: desktop-launch snapcraft-preload /usr/bin/contour
 
 parts:
   contour:
@@ -48,6 +49,9 @@ parts:
     source-commit: 2089d98a92e06661fab72650388c0bb88be457fe
 #    source-tag:  
     plugin: cmake
+    override-build: |
+      snapcraftctl build
+      chmod +x $SNAPCRAFT_PART_INSTALL/usr/bin/contour
     cmake-parameters: [
       "-DCMAKE_CXX_FLAGS='-fdiagnostics-color=always \
                            -D_FORTIFY_SOURCE=2 \
@@ -67,6 +71,7 @@ parts:
                            -Wl,-z,now \
                            -Wl,-z,relro'",
       "-DCMAKE_BUILD_TYPE=Release",
+      "-DCMAKE_INSTALL_PREFIX=/usr",
       "-DCMAKE_EXPORT_COMPILE_COMMANDS='ON'",
       "-DOpenGL_GL_PREFERENCE='LEGACY'",
       "-DYAML_CPP_BUILD_CONTRIB='OFF'",
@@ -97,6 +102,16 @@ parts:
       - libkf5windowsystem5
       - libqt5x11extras5
       - libtbb2
+
+  snapcraft-preload:
+    source: https://github.com/sergiusens/snapcraft-preload.git
+    plugin: cmake
+    build-packages:
+      - on amd64:
+        - gcc-multilib
+        - g++-multilib
+    stage-packages:
+      - lib32stdc++6
 
   desktop-qt5:
     build-packages:
