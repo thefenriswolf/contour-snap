@@ -39,7 +39,7 @@ apps:
       TMPDIR: $XDG_RUNTIME_DIR     
       LC_ALL: "C.UTF-8"
       LANG: "C.UTF-8"
-    command: desktop-launch snapcraft-preload /usr/bin/contour
+    command: desktop-launch $SNAP/usr/bin/contour
 
 parts:
   contour:
@@ -47,31 +47,21 @@ parts:
     source: https://github.com/christianparpart/contour.git
     source-type: git
     source-commit: 2089d98a92e06661fab72650388c0bb88be457fe
-#    source-tag:  
     plugin: cmake
-    override-build: |
-      snapcraftctl build
-      chmod +x $SNAPCRAFT_PART_INSTALL/usr/bin/contour
+#    override-build: |
+#      bash autogen.sh
+#      cd build
+#      ninja
+#      cp src/contour/contour $SNAPCRAFT_PART_INSTALL/usr/bin/
+#      chmod a+x $SNAPCRAFT_PART_INSTALL/usr/bin/contour
     cmake-parameters: [
-      "-DCMAKE_CXX_FLAGS='-fdiagnostics-color=always \
-                           -D_FORTIFY_SOURCE=2 \
-                           -D_GLIBCXX_ASSERTIONS \
-                           -fasynchronous-unwind-tables \
-                           -fexceptions \
-                           -fpie -Wl,-pie \
-                           -fstack-clash-protection \
-                           -fstack-protector-strong
+      "-DCMAKE_CXX_FLAGS=' -fdiagnostics-color=always \
                            -g \
-                           -grecord-gcc-switches \
                            -O2 \
                            -pipe \
-                           -Wall \
-                           -Werror=format-security \
-                           -Wl,-z,defs \
-                           -Wl,-z,now \
-                           -Wl,-z,relro'",
+                           -Wall'",
       "-DCMAKE_BUILD_TYPE=Release",
-      "-DCMAKE_INSTALL_PREFIX=/usr",
+      #"-DCMAKE_INSTALL_PREFIX=/usr",
       "-DCMAKE_EXPORT_COMPILE_COMMANDS='ON'",
       "-DOpenGL_GL_PREFERENCE='LEGACY'",
       "-DYAML_CPP_BUILD_CONTRIB='OFF'",
@@ -79,15 +69,17 @@ parts:
       "-DYAML_CPP_BUILD_TESTS='OFF'",
       "-DYAML_CPP_INSTALL='OFF'",
       "-DYAML_BUILD_SHARED_LIBS='OFF'",
-#      "-DLIBTERMINAL_LOG_RAW='ON'",
-#      "-DLIBTERMINAL_LOG_TRACE='ON'",
+      "-DLIBTERMINAL_LOG_RAW='ON'",
+      "-DLIBTERMINAL_LOG_TRACE='ON'",
       "-DLIBTERMINAL_EXECUTION_PAR='ON'",
       "-DCONTOUR_COVERAGE='OFF'",
       "-DCONTOUR_PERF_STATS='OFF'",
-      "-DCONTOUR_BLUR_PLATFORM_KWIN='ON'" ]
+      "-DCONTOUR_BLUR_PLATFORM_KWIN='ON'",
+      "-GNinja" ]
     build-packages:
       - cmake
       - extra-cmake-modules
+      - ninja-build
       - g++
       - libfreetype6-dev
       - qtbase5-dev
@@ -103,15 +95,15 @@ parts:
       - libqt5x11extras5
       - libtbb2
 
-  snapcraft-preload:
-    source: https://github.com/sergiusens/snapcraft-preload.git
-    plugin: cmake
-    build-packages:
-      - on amd64:
-        - gcc-multilib
-        - g++-multilib
-    stage-packages:
-      - lib32stdc++6
+#  snapcraft-preload:
+#    source: https://github.com/sergiusens/snapcraft-preload.git
+#    plugin: cmake
+#    build-packages:
+#      - on amd64:
+#        - gcc-multilib
+#        - g++-multilib
+#    stage-packages:
+#      - lib32stdc++6
 
   desktop-qt5:
     build-packages:
